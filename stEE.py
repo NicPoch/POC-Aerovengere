@@ -123,7 +123,7 @@ def timeGraphs(data,lat,lon,area):
         for model_name in models[name].keys():
             temp=info[["time","source"]].copy()
             temp["source"]=model_name
-            dataTime=np.array(temp['time'])
+            dataTime=np.array(temp['time'].copy())
             dataTime=dataTime.reshape(-1,1)
             temp[data[name]['param']]=list(models[name][model_name]['trainModel'].predict(dataTime))
             info=info.append(temp)
@@ -162,7 +162,8 @@ def main():
             dataTime=np.array(int(round(time.time() * 1000)))
             dataTime=dataTime.reshape(-1, 1)
             pred=models[pollutant][model]['trainModel'].predict(dataTime)
-            st.text(f'\t{model}: {pred} ppb')
+            score=models[pollutant][model]['cv_results'].mean()
+            st.text(f'\t{model}: {pred[0]}ppb')
     
 
 
