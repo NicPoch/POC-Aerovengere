@@ -1,10 +1,10 @@
-geopy==2.1.0
 folium==0.12.1
-plotly==4.11.0
-numpy==1.18.5
-streamlit_folium==0.4.0
-earthengine_api==0.1.268
-streamlit==0.82.0
+geopy==2.1.0
+numpy==1.19.5
+streamlit==0.83.0
 pandas==1.0.5
+streamlit_folium==0.4.0
+plotly==4.11.0
+earthengine_api==0.1.268
 ee==0.4
 scikit_learn==0.24.2

@@ -1,3 +1,4 @@
+from pprint import pprint
 from random import shuffle
 from ee import data, image
 import streamlit as st
@@ -16,6 +17,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 import numpy as np
 import time
+import pickle
 
 
 ee.Initialize()
@@ -30,40 +32,8 @@ def getCoordinates(user_input):
 
 @st.cache
 def loadImagesAndViz():
-    data={}
-    #Carbon monoxide
-    image=ee.ImageCollection("COPERNICUS/S5P/NRTI/L3_CO")
-    vis_params = {
-        "min": 0,
-        "max": 0.05,
-        "palette": ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
-    }
-    data['CO']={'image':image,'vis_params':vis_params,'param':'CO_column_number_density'}
-    #Nitrogen Dioxide
-    image=ee.ImageCollection("COPERNICUS/S5P/NRTI/L3_NO2")
-    vis_params = {
-        "min": 0,
-        "max": 0.0002,
-        "palette": ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
-    }
-    data['NO2']={'image':image,'vis_params':vis_params,'param':'NO2_column_number_density'}
-    #Ozone
-    image=ee.ImageCollection("COPERNICUS/S5P/NRTI/L3_O3")
-    vis_params = {
-        "min": 0.12,
-        "max": 0.15,
-        "palette": ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
-    }
-    data['o3']={'image':image,'vis_params':vis_params,'param':'O3_column_number_density'}
-    #Sulfur dioxide
-    image=ee.ImageCollection("COPERNICUS/S5P/NRTI/L3_SO2")
-    vis_params = {
-        "min": 0.0,
-        "max": 0.0005,
-        "palette": ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
-    }
-    data['SO2']={'image':image,'vis_params':vis_params,'param':'SO2_column_number_density'}
-    
+    dbfile = open('infoImagesAndViz', 'rb')     
+    data = pickle.load(dbfile)    
     return data
 
 def add_ee_layer(self, ee_image_object, vis_params, name):
@@ -93,14 +63,14 @@ def createMap(idate,fdate,lat,lon,data):
 def createModels(data,param):
     X_train, X_test, y_train, y_test = train_test_split(data['time'],data[param], test_size=0.33,shuffle=False)
     models = []
-    models.append(('KN', KNeighborsRegressor()))
+    models.append(('KN', KNeighborsRegressor(n_neighbors=5,weights='uniform')))    
     models.append(('DT',tree.DecisionTreeRegressor()))    
     modelInformation={}
     tscv = TimeSeriesSplit(n_splits=10)
     for name, model in models:
         X_train=np.array(X_train)
         X_train=X_train.reshape(-1, 1)
-        y_train=np.array(y_train)
+        y_train=np.array(y_train).ravel()
         trainModel=model.fit(X_train,y_train)
         cv_results = cross_val_score(model, X_train, y_train, cv=tscv, scoring='r2')
         modelInformation[name]={'trainModel':trainModel,'cv_results':cv_results}     
@@ -111,6 +81,7 @@ def timeGraphs(data,lat,lon,area):
     graphs=[]
     models={}
     for name in data.keys():
+        pprint(data[name])
         info=data[name]['image'].select(data[name]['param']).getRegion(point,area).getInfo()      
         info=pd.DataFrame(info)
         info=info.dropna()
@@ -136,36 +107,38 @@ def unix_time_millis():
     return (datetime.datetime.now() - datetime(1970, 1, 1)).total_seconds() * 1000.0
 
 def main():
-    st.header("POC")
-    start_date=st.sidebar.date_input("Start Date",value=datetime.date.today()-timedelta(days=20))
-    end_date=st.sidebar.date_input("End Date",value=datetime.date.today()-timedelta(days=7))
+    st.header("POC Aerovengers")
+    st.subheader("Why Air Quality?")
+    with open("whyAQ.txt",encoding = 'utf-8') as f:
+        text=f.readline()
+        st.markdown(text)
+    st.subheader("Air Quality Categories for Pollutant")
+    st.dataframe(pd.read_excel('TableAQI.xlsx'))
+    start_date=st.sidebar.date_input("Start Date",value=datetime.date.today()-timedelta(days=20),min_value=datetime.date(2018,7,4))
+    end_date=st.sidebar.date_input("End Date",value=datetime.date.today()-timedelta(days=7),max_value=datetime.date.today()-timedelta(days=7),min_value=start_date)
     area=st.sidebar.slider("Distance from center (m)",min_value=100,max_value=100000,value=500)
-    user_input = st.text_input("Search for city or country", "Paris")
+    st.subheader("Visualize Pollutants")
+    user_input = st.text_input("Search for a city or country", "Paris")
     lat,lon=getCoordinates(user_input)
     data=loadImagesAndViz()
     my_map=createMap(start_date,end_date,lat,lon,data)
-    st.subheader("Pollutants Map")
     folium_static(my_map)    
-    st.subheader("Air Quality Categories for Pollutant")
-    st.dataframe(pd.read_excel('TableAQI.xlsx'))
-    st.subheader("Data")
-    st.text(f'Latitude of Place: {lat}')
-    st.text(f'Longitude of Place: {lon}')
-    st.text(f'Sample Area from place: {area}')
+    st.subheader(f'Data for {user_input}')
+    st.markdown(f'Latitude of Place: {lat}')
+    st.markdown(f'Longitude of Place: {lon}')
+    st.markdown(f'Sample Area from place: {area} meters')
     graphs,models=timeGraphs(data,lat,lon,area)
     for g in graphs:
         st.plotly_chart(g)
     st.subheader("Predict Today")
     for pollutant in models.keys():
-        st.text(f'{pollutant}')
+        st.markdown(f'{pollutant}')
         for model in models[pollutant].keys():
             dataTime=np.array(int(round(time.time() * 1000)))
             dataTime=dataTime.reshape(-1, 1)
             pred=models[pollutant][model]['trainModel'].predict(dataTime)
             score=models[pollutant][model]['cv_results'].mean()
-            st.text(f'\t{model}: {pred[0]}ppb')
+            st.markdown(f'  \t{model}: {pred[0]} ppb')
     
-
-
 if __name__=="__main__":
     main()
