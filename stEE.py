@@ -113,7 +113,7 @@ def main():
         text=f.readline()
         st.markdown(text)
     st.subheader("Air Quality Categories for Pollutant")
-    st.dataframe(pd.read_excel('TableAQI.xlsx'))
+    st.dataframe(pd.read_csv('TableAQI.csv'))
     start_date=st.sidebar.date_input("Start Date",value=datetime.date.today()-timedelta(days=20),min_value=datetime.date(2018,7,4))
     end_date=st.sidebar.date_input("End Date",value=datetime.date.today()-timedelta(days=7),max_value=datetime.date.today()-timedelta(days=7),min_value=start_date)
     area=st.sidebar.slider("Distance from center (m)",min_value=100,max_value=100000,value=500)

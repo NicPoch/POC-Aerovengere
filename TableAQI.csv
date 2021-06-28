@@ -1,0 +1,5 @@
+Pollutant,Key,Measurement,Good,Fair,Poor,Very Poor,Extremely Poor
+Ozone,O3,ppb,<50,"[50,100)","[100,150)","[150,300)",300<=
+Nitrogen Dioxide,NO2,ppb,<60,"[60,120)","[120,180)","[180,360)",360<=
+Sulfur Dioxide,SO2,pbb,<100,"[100,200)","[200,300)","[300,600)",600<=
+Carbon Monoxide,CO,ppb,<30000,NA,"[30000,70000)",NA,70000<=
