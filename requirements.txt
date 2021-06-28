@@ -6,5 +6,4 @@ pandas==1.0.5
 streamlit_folium==0.4.0
 plotly==4.11.0
 earthengine_api==0.1.268
-ee==0.4
 scikit_learn==0.24.2
