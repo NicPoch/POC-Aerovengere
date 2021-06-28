@@ -1,7 +1,6 @@
 from datetime import time
 from time import sleep
 import ee
-from ee import data, image
 import pickle
 from datetime import datetime
 
