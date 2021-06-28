@@ -81,7 +81,6 @@ def timeGraphs(data,lat,lon,area):
     graphs=[]
     models={}
     for name in data.keys():
-        pprint(data[name])
         info=data[name]['image'].select(data[name]['param']).getRegion(point,area).getInfo()      
         info=pd.DataFrame(info)
         info=info.dropna()
