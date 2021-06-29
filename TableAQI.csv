@@ -1,5 +1,4 @@
-Pollutant,Key,Measurement,Good,Fair,Poor,Very Poor,Extremely Poor
-Ozone,O3,ppb,<50,"[50,100)","[100,150)","[150,300)",300<=
-Nitrogen Dioxide,NO2,ppb,<60,"[60,120)","[120,180)","[180,360)",360<=
-Sulfur Dioxide,SO2,pbb,<100,"[100,200)","[200,300)","[300,600)",600<=
-Carbon Monoxide,CO,ppb,<30000,NA,"[30000,70000)",NA,70000<=
+Pollutant,Key,Measurement,Good (Green),Moderate (Yellow),Unhealthy for some groups (Orange),Unhealthy (red),Very Unhealthy (purple),Hazardous (brown)
+Nitrogen Dioxide,NO2,ppb,<=0.054,"(0.054,0.101]","(0.101,0.361]","(0.361,0.65]","(0.65,1.25]",1.25<
+Sulfur Dioxide,SO2,pbb,<=36,"(36,76]","(76,186]","(186,304]","(304,605]",605<
+Carbon Monoxide,CO,ppb,<=4500,"(4500,9500]","(9500,12500]","(12500,15500]","(15500,30500]",30500<
