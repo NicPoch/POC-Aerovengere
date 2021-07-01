@@ -1,5 +1,3 @@
-from pprint import pprint
-from random import shuffle
 from ee import data, image
 import streamlit as st
 import pandas as pd
@@ -10,11 +8,8 @@ from streamlit_folium import folium_static
 import folium
 import ee
 import plotly.express as px
-from sklearn.model_selection import TimeSeriesSplit
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn import tree
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
 import numpy as np
 import time
 import pickle
@@ -55,11 +50,14 @@ def createMap(idate,fdate,lat,lon,data):
     f_date = f'{fdate.year}-{fdate.month}-{fdate.day}'
     my_map = folium.Map(location=[lat, lon], zoom_start=7)
     for name in data.keys():
-        tile=data[name]['image'].select(data[name]['param']).filterDate(i_date, f_date)
-        tile=tile.mean()
-        tile=tile.divide(AVERAGE_TROPOSPHERE_HEIGHT_M)
-        tile=tile.multiply(data[name]['M']*1000)
-        my_map.add_ee_layer(tile, data[name]['vis_params'], name)
+        try:
+            tile=data[name]['image'].select(data[name]['param']).filterDate(i_date, f_date)
+            tile=tile.mean()
+            tile=tile.divide(AVERAGE_TROPOSPHERE_HEIGHT_M)
+            tile=tile.multiply(data[name]['M']*1000)
+            my_map.add_ee_layer(tile, data[name]['vis_params'], name)
+        except:
+            pass
 
     folium.LayerControl(collapsed = False).add_to(my_map)
     return my_map
@@ -160,7 +158,7 @@ def main():
     #Sidebar
     start_date=st.sidebar.date_input("Start Date",value=datetime.date.today()-timedelta(days=20),min_value=datetime.date(2018,7,4))
     end_date=st.sidebar.date_input("End Date",value=datetime.date.today()-timedelta(days=7),max_value=datetime.date.today()-timedelta(days=7),min_value=start_date)
-    area=st.sidebar.slider("Distance from center (m)",min_value=100,max_value=100000,value=500)
+    area=st.sidebar.slider("Distance from center (m)",min_value=500,max_value=100000,value=1000)
     #Main
     st.subheader("Visualize Pollutants")
     user_input = st.text_input("Search for a city or country", "Paris")
