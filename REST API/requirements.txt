@@ -1,0 +1,6 @@
+earthengine_api==0.1.268
+numpy==1.21.0
+Flask==1.1.2
+pandas==1.0.5
+ee==0.4
+scikit_learn==0.24.2

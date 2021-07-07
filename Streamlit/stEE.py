@@ -8,6 +8,7 @@ from streamlit_folium import folium_static
 import folium
 import ee
 import plotly.express as px
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn import tree
 import numpy as np
